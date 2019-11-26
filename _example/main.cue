@@ -1,21 +1,24 @@
 package main
 
-import "github.com/hdonnay/systool/cmd"
+import "github.com/hdonnay/systool/sh"
 
-OK = cmd.msg & {msg: "OK"}
-hostname = cmd.dstring & {value: "$(hostname)"}
-print_hostname = cmd.msg & { msg: "hostname is: $(hostname)"}
+OK = sh.Msg & {msg: "OK"}
+hostname = sh.dq & {value: "$(hostname)"}
+print_hostname = sh.Msg & {msg: sh.dq & { value: "hostname is: $(hostname)"} }
 
-script: cmd.script & {
-	_cmds: [
-		cmd.msg & {msg: ["hello, $USER"]},
+script: sh.Script & {
+	cmds: [
+		sh.Msg & {msg: sh.dq &{ value: "hello, $USER" }},
 		print_hostname,
-		cmd.cond & {
-			test: cmd.test & {test: [hostname, "=", "rot"]}
-			body: [OK]
+		sh.Cond & {
+			test: sh.Cmd & {
+				exe: "test"
+				argv: [hostname, "=", "rot"]
+			}
+			body: OK
 		},
-		cmd.switch & {
-			test: hostname
+		sh.Switch & {
+			test: hostname,
 			case: toolbox: [OK]
 		},
 	]
